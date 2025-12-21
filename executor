@@ -1,42 +1,66 @@
--- EXECUTOR DE CLIENTE
+-- CÓDIGO DEL EXECUTOR (GUI + ENVÍO)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
--- Buscamos el evento (esperamos máximo 2 segundos)
-local remote = ReplicatedStorage:FindFirstChild("CanalPrivado")
+-- 1. BUSCAR LA PUERTA (RemoteEvent)
+-- Usamos un tiempo de espera de 5 segundos para que no se bloquee el script
+local remote = ReplicatedStorage:WaitForChild("CanalPrivado", 5)
 
 if not remote then
-    -- Si no existe, lo creamos nosotros para forzar la conexión (solo si el servidor está escuchando)
-    remote = Instance.new("RemoteEvent", ReplicatedStorage)
-    remote.Name = "CanalPrivado"
+    warn("❌ ERROR: No se encontró la backdoor 'CanalPrivado'.")
+    return
 end
 
--- CREAR LA INTERFAZ
-local sg = Instance.new("ScreenGui", CoreGui)
-local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 350, 0, 220)
-main.Position = UDim2.new(0.5, -175, 0.5, -110)
-main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-main.Active = true
-main.Draggable = true
+-- 2. CREAR LA INTERFAZ VISUAL
+-- Usamos CoreGui para que la ventana sea independiente de tu juego
+local screenGui = Instance.new("ScreenGui", CoreGui)
+screenGui.Name = "ServerSideExecutor"
 
-local box = Instance.new("TextBox", main)
-box.Size = UDim2.new(0.9, 0, 0, 120)
-box.Position = UDim2.new(0.05, 0, 0.1, 0)
-box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-box.TextColor3 = Color3.new(1, 1, 1)
-box.Text = "print('¡Control del servidor activo!')"
-box.MultiLine = true
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 350, 0, 220)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -110)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.Active = true
+mainFrame.Draggable = true -- Permite mover la ventana con el ratón
 
-local btn = Instance.new("TextButton", main)
-btn.Size = UDim2.new(0.9, 0, 0, 40)
-btn.Position = UDim2.new(0.05, 0, 0.75, 0)
-btn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-btn.Text = "EXECUTE SERVER-SIDE"
-btn.TextColor3 = Color3.new(1, 1, 1)
+local corner = Instance.new("UICorner", mainFrame)
 
-btn.MouseButton1Click:Connect(function()
-    -- Enviamos el texto al servidor
-    remote:FireServer(box.Text)
-    print("🚀 Código enviado al servidor: " .. box.Text)
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "SERVER EXECUTOR"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+
+-- 3. CAJA DE TEXTO (Donde escribes el código)
+local textBox = Instance.new("TextBox", mainFrame)
+textBox.Size = UDim2.new(0.9, 0, 0, 120)
+textBox.Position = UDim2.new(0.05, 0, 0.2, 0)
+textBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+textBox.TextColor3 = Color3.new(1, 1, 1)
+textBox.Text = "print('Hola desde el Servidor')"
+textBox.ClearTextOnFocus = false
+textBox.MultiLine = true
+textBox.TextXAlignment = Enum.TextXAlignment.Left
+textBox.TextYAlignment = Enum.TextYAlignment.Top
+
+-- 4. BOTÓN DE EJECUCIÓN
+local executeBtn = Instance.new("TextButton", mainFrame)
+executeBtn.Size = UDim2.new(0.9, 0, 0, 40)
+executeBtn.Position = UDim2.new(0.05, 0, 0.78, 0)
+executeBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 0)
+executeBtn.Text = "EXECUTE SERVER-SIDE"
+executeBtn.TextColor3 = Color3.new(1, 1, 1)
+executeBtn.Font = Enum.Font.GothamBold
+
+local btnCorner = Instance.new("UICorner", executeBtn)
+
+-- 5. LÓGICA DE ENVÍO
+executeBtn.MouseButton1Click:Connect(function()
+    local codeToSend = textBox.Text
+    -- Enviamos el texto directamente al servidor a través del RemoteEvent
+    remote:FireServer(codeToSend)
+    print("🚀 Código enviado al servidor: " .. codeToSend)
 end)
+
+print("✅ GUI del Executor cargada con éxito.")
