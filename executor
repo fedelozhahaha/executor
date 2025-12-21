@@ -1,0 +1,42 @@
+-- EXECUTOR DE CLIENTE
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+
+-- Buscamos el evento (esperamos máximo 2 segundos)
+local remote = ReplicatedStorage:FindFirstChild("CanalPrivado")
+
+if not remote then
+    -- Si no existe, lo creamos nosotros para forzar la conexión (solo si el servidor está escuchando)
+    remote = Instance.new("RemoteEvent", ReplicatedStorage)
+    remote.Name = "CanalPrivado"
+end
+
+-- CREAR LA INTERFAZ
+local sg = Instance.new("ScreenGui", CoreGui)
+local main = Instance.new("Frame", sg)
+main.Size = UDim2.new(0, 350, 0, 220)
+main.Position = UDim2.new(0.5, -175, 0.5, -110)
+main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+main.Active = true
+main.Draggable = true
+
+local box = Instance.new("TextBox", main)
+box.Size = UDim2.new(0.9, 0, 0, 120)
+box.Position = UDim2.new(0.05, 0, 0.1, 0)
+box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+box.TextColor3 = Color3.new(1, 1, 1)
+box.Text = "print('¡Control del servidor activo!')"
+box.MultiLine = true
+
+local btn = Instance.new("TextButton", main)
+btn.Size = UDim2.new(0.9, 0, 0, 40)
+btn.Position = UDim2.new(0.05, 0, 0.75, 0)
+btn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+btn.Text = "EXECUTE SERVER-SIDE"
+btn.TextColor3 = Color3.new(1, 1, 1)
+
+btn.MouseButton1Click:Connect(function()
+    -- Enviamos el texto al servidor
+    remote:FireServer(box.Text)
+    print("🚀 Código enviado al servidor: " .. box.Text)
+end)
