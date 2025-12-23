@@ -543,50 +543,98 @@ UICorner_18.Parent = TextButton
 UICorner_19.Parent = BackgroundColor
 
 
--- // CONFIGURACIÓN DE CONEXIÓN //
-local REMOTE_NAME = "Lighting" -- Debe coincidir con el de la backdoor
+local TweenService = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
+local REMOTE_NAME = "Lighting"
 local remote = game:GetService("ReplicatedStorage"):WaitForChild(REMOTE_NAME)
 
--- // VARIABLES PRINCIPALES //
-local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
+-- // VARIABLES DE ESTADO //
+local uiVisible = true
+local toggles = {
+	AntiAFK = false,
+	R6 = false,
+	BGColor = false
+}
 
--- // FUNCIÓN DE NAVEGACIÓN (TABS) //
+-- // FUNCIÓN DE TWEEN PARA INTERRUPTORES //
+local function animateToggle(button, state)
+	local circle = button:FindFirstChild("Frame") or button:FindFirstChild("Frame_2") or button:FindFirstChild("Frame_3")
+	if not circle then return end
+
+	local targetPos = state and UDim2.new(0.5, 0, 0.1, 0) or UDim2.new(0, 0, 0.1, 0)
+	local targetColor = state and Color3.fromRGB(0, 215, 100) or Color3.fromRGB(255, 255, 255)
+
+	TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = targetPos, BackgroundColor3 = targetColor}):Play()
+end
+
+-- // FUNCIÓN DE NAVEGACIÓN //
 local function showPanel(panelName)
 	ScanPanel.Enabled = (panelName == "Scan")
 	ExecutorPanel.Enabled = (panelName == "Executor")
 	SettingsPanel.Enabled = (panelName == "Settings")
 end
 
--- Configuración inicial
-showPanel("Scan")
+showPanel("Scan") -- Panel por defecto
 
-ScanPanelButton.MouseButton1Click:Connect(function() showPanel("Scan") end)
-ExecutorPanelButton.MouseButton1Click:Connect(function() showPanel("Executor") end)
-SettingsPanelButton.MouseButton1Click:Connect(function() showPanel("Settings") end)
-
--- // LÓGICA DEL PANEL DE SCAN //
-ScanButton.MouseButton1Click:Connect(function()
-	WelcomeText.Text = "Welcome back, " .. player.Name .. "."
-	UserId.Text = "User ID: " .. player.UserId
-	
-	-- Obtener miniatura del jugador
-	local content, isReady = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-	UserAvatar.Image = content
-	
-	-- Efecto visual simple
-	ScanButton.Text = "SYSTEM READY"
-	task.wait(1)
-	ScanButton.Text = "Scan"
+-- // BOTÓN TOGGLE (OCULTAR TODO) //
+ToggleButton.MouseButton1Click:Connect(function()
+	uiVisible = not uiVisible
+	Background.Visible = uiVisible
+	-- Ocultamos los CanvasGroups o Enabled según la visibilidad general
+	ScanPanel.Enabled = uiVisible and (not ExecutorPanel.Enabled and not SettingsPanel.Enabled)
+	if not uiVisible then
+		ScanPanel.Enabled = false
+		ExecutorPanel.Enabled = false
+		SettingsPanel.Enabled = false
+		BackgroundColorGui.Enabled = false
+	else
+		showPanel("Scan") -- Al volver a mostrar, reseteamos a Scan por seguridad
+	end
 end)
 
--- // LÓGICA DEL EXECUTOR //
+-- // NAVEGACIÓN DE BOTONES //
+ScanPanelButton.MouseButton1Click:Connect(function() if uiVisible then showPanel("Scan") end end)
+ExecutorPanelButton.MouseButton1Click:Connect(function() if uiVisible then showPanel("Executor") end end)
+SettingsPanelButton.MouseButton1Click:Connect(function() if uiVisible then showPanel("Settings") end end)
+
+-- // LÓGICA DE SETTINGS CON TWEEN //
+
+-- Anti-AFK
+AntiAFK.MouseButton1Click:Connect(function()
+	toggles.AntiAFK = not toggles.AntiAFK
+	animateToggle(AntiAFK, toggles.AntiAFK)
+	
+	if toggles.AntiAFK then
+		local vu = game:GetService("VirtualUser")
+		player.Idled:Connect(function()
+			if toggles.AntiAFK then
+				vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+				task.wait(1)
+				vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+			end
+		end)
+	end
+end)
+
+-- R6 Body (Simulación visual)
+R6Button.MouseButton1Click:Connect(function()
+	toggles.R6 = not toggles.R6
+	animateToggle(R6Button, toggles.R6)
+end)
+
+-- Background Color Toggle
+BackgroundColorButton.MouseButton1Click:Connect(function()
+	toggles.BGColor = not toggles.BGColor
+	animateToggle(BackgroundColorButton, toggles.BGColor)
+	BackgroundColorGui.Enabled = toggles.BGColor
+end)
+
+-- // EXECUTOR //
 ExecuteButton.MouseButton1Click:Connect(function()
-	local code = Script.Text
-	if code ~= "" then
-		remote:FireServer(code) -- Envía el código a la backdoor
-		ExecuteButton.Text = "Executed!"
-		task.wait(0.5)
+	if Script.Text ~= "" then
+		remote:FireServer(Script.Text)
+		ExecuteButton.Text = "¡Enviado!"
+		task.wait(0.7)
 		ExecuteButton.Text = "Execute"
 	end
 end)
@@ -595,72 +643,30 @@ ClearButton.MouseButton1Click:Connect(function()
 	Script.Text = ""
 end)
 
--- // LÓGICA DE SETTINGS //
-
--- Toggle para Anti-AFK
-local antiAfkEnabled = false
-AntiAFK.MouseButton1Click:Connect(function()
-	antiAfkEnabled = not antiAfkEnabled
-	Frame.BackgroundColor3 = antiAfkEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 255, 255)
-	
-	if antiAfkEnabled then
-		-- Script simple de Anti-AFK
-		local virtualUser = game:GetService("VirtualUser")
-		player.Idled:Connect(function()
-			if antiAfkEnabled then
-				virtualUser:CaptureController()
-				virtualUser:ClickButton2(Vector2.new())
-			end
-		end)
-	end
+-- // SCAN PANEL //
+ScanButton.MouseButton1Click:Connect(function()
+	WelcomeText.Text = "Bienvenido, " .. player.Name
+	UserId.Text = "ID: " .. player.UserId
+	local thumb, ready = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+	UserAvatar.Image = thumb
 end)
 
--- Abrir selector de color
-BackgroundColorButton.MouseButton1Click:Connect(function()
-	BackgroundColorGui.Enabled = not BackgroundColorGui.Enabled
-end)
-
--- Aplicar color Hexadecimal
+-- // CAMBIAR COLOR HEX //
 TextButton.MouseButton1Click:Connect(function()
-	local hex = TextBox.Text
-	local success, result = pcall(function()
-		return Color3.fromHex(hex)
-	end)
-	
+	local success, result = pcall(function() return Color3.fromHex(TextBox.Text) end)
 	if success then
 		Background.BackgroundColor3 = result
 		Frame_4.BackgroundColor3 = result
-		BackgroundColorGui.Enabled = false
-	else
-		TextBox.Text = "Invalid Hex!"
-		task.wait(1)
-		TextBox.Text = ""
 	end
 end)
 
--- // BOTÓN DE MINIMIZAR (TOGGLE) //
-ToggleButton.MouseButton1Click:Connect(function()
-	Background.Visible = not Background.Visible
-end)
-
--- // HACER LA GUI ARRASTRABLE //
+-- // ARRASTRE MANUAL (SIN UIDRAGDETECTOR) //
 local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-	local delta = input.Position - dragStart
-	Background.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
 Background.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
 		dragStart = input.Position
 		startPos = Background.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
 	end
 end)
 
@@ -672,6 +678,13 @@ end)
 
 game:GetService("UserInputService").InputChanged:Connect(function(input)
 	if input == dragInput and dragging then
-		update(input)
+		local delta = input.Position - dragStart
+		Background.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
 	end
 end)
