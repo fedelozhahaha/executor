@@ -549,145 +549,131 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. CONFIGURACIÓN INICIAL DE PANELES
--- Aseguramos que solo el panel de Scan se vea al inicio
+-- 1. CONFIGURACIÓN INICIAL (Estado por defecto)
+-- Desactivamos todos los paneles secundarios
 ScanPanel.Enabled = true
 ExecutorPanel.Enabled = false
 SettingsPanel.Enabled = false
+BackgroundColorGui.Enabled = false
 
+-- Aseguramos que el Background principal sea visible
+Background.Visible = true
+
+-- 2. NAVEGACIÓN ENTRE PANELES
 local function switchPanel(toEnable)
-	ScanPanel.Enabled = false
-	ExecutorPanel.Enabled = false
-	SettingsPanel.Enabled = false
-	toEnable.Enabled = true
+    -- Desactivamos todos
+    ScanPanel.Enabled = false
+    ExecutorPanel.Enabled = false
+    SettingsPanel.Enabled = false
+    -- Activamos el seleccionado
+    toEnable.Enabled = true
 end
 
 ScanPanelButton.MouseButton1Click:Connect(function() switchPanel(ScanPanel) end)
 ExecutorPanelButton.MouseButton1Click:Connect(function() switchPanel(ExecutorPanel) end)
 SettingsPanelButton.MouseButton1Click:Connect(function() switchPanel(SettingsPanel) end)
 
--- 2. SISTEMA DE TOGGLES ANIMADOS (Settings)
+-- 3. SISTEMA DE TOGGLES ANIMADOS (Deslizamiento suave)
 local function MakeToggle(button, circle, callback)
-	local enabled = false
-	button.MouseButton1Click:Connect(function()
-		enabled = not enabled
-
-		-- Colores: Verde si ON, Morado original si OFF
-		local targetColor = enabled and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(182, 137, 182)
-		-- Posición: Derecha si ON, Izquierda si OFF (Basado en el ancho del botón)
-		local targetPos = enabled and UDim2.new(0.5, 0, 0.1, 0) or UDim2.new(0, 0, 0.1, 0)
-
-		TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = targetColor}):Play()
-		TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = targetPos}):Play()
-
-		callback(enabled)
-	end)
+    local enabled = false
+    button.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        
+        -- Animación de color y posición del círculo
+        local targetColor = enabled and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(182, 137, 182)
+        local targetPos = enabled and UDim2.new(0.5, 0, 0.1, 0) or UDim2.new(0, 0, 0.1, 0)
+        
+        TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = targetColor}):Play()
+        TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = targetPos}):Play()
+        
+        callback(enabled)
+    end)
 end
 
--- Toggle: Anti-AFK
+-- Lógica Anti-AFK
 MakeToggle(AntiAFK, Frame, function(state)
-	if state then
-		_G.AntiAFK = LocalPlayer.Idled:Connect(function()
-			game:GetService("VirtualUser"):CaptureController()
-			game:GetService("VirtualUser"):ClickButton2(Vector2.new())
-		end)
-	else
-		if _G.AntiAFK then _G.AntiAFK:Disconnect() end
-	end
+    if state then
+        _G.AntiAFK = LocalPlayer.Idled:Connect(function()
+            game:GetService("VirtualUser"):CaptureController()
+            game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+        end)
+    else
+        if _G.AntiAFK then _G.AntiAFK:Disconnect() end
+    end
 end)
 
--- Toggle: R6 Body
+-- Lógica R6
 MakeToggle(R6Button, Frame_2, function(state)
-	if state then print("R6 Mode: Activated (Local)") end
+    if state then print("R6 Mode Active") end
 end)
 
--- 3. BACKGROUND COLOR (Hex Logic)
+-- 4. BACKGROUND COLOR (Sistema Hexadecimal)
 BackgroundColorButton.MouseButton1Click:Connect(function()
-	BackgroundColorGui.Enabled = not BackgroundColorGui.Enabled
+    BackgroundColorGui.Enabled = not BackgroundColorGui.Enabled
 end)
 
-TextButton.MouseButton1Click:Connect(function() -- Botón "Apply"
-	local hexInput = TextBox.Text:gsub("#", "")
-	local success, color = pcall(function() return Color3.fromHex(hexInput) end)
-
-	if success then
-		Background.BackgroundColor3 = color
-		Frame_4.BackgroundColor3 = color
-		BackgroundColorGui.Enabled = false
-	else
-		TextBox.Text = "ERR: HEX"
-		task.wait(1)
-		TextBox.Text = ""
-	end
+TextButton.MouseButton1Click:Connect(function() -- Botón Apply
+    local hexInput = TextBox.Text:gsub("#", "")
+    local success, color = pcall(function() return Color3.fromHex(hexInput) end)
+    
+    if success then
+        Background.BackgroundColor3 = color
+        Frame_4.BackgroundColor3 = color
+        BackgroundColorGui.Enabled = false
+    else
+        TextBox.Text = "INVALID HEX"
+        task.wait(1)
+        TextBox.Text = ""
+    end
 end)
 
--- 4. EXECUTOR (Execute & Clear)
+-- 5. EXECUTOR (Execute & Clear)
 ExecuteButton.MouseButton1Click:Connect(function()
-	local code = Script.Text
-	local func, err = loadstring(code)
-	if func then
-		pcall(func)
-	else
-		warn("Hyperion Error: " .. err)
-	end
+    local code = Script.Text
+    local func, err = loadstring(code)
+    if func then
+        pcall(func)
+    else
+        warn("Hyperion Error: " .. err)
+    end
 end)
 
 ClearButton.MouseButton1Click:Connect(function()
-	Script.Text = ""
+    Script.Text = ""
 end)
 
--- 5. SCANNER (Backdoor Search)
+-- 6. SCANNER (Buscador de Remotos)
 ScanButton.MouseButton1Click:Connect(function()
-	ScanButton.Text = "SCANNING..."
-	local foundCount = 0
-	for _, item in pairs(game:GetDescendants()) do
-		if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
-			foundCount = foundCount + 1
-			-- Test payload silencioso
-			pcall(function() item:FireServer("print('Vulnerable')") end)
-		end
-		if foundCount % 150 == 0 then task.wait() end
-	end
-	ScanButton.Text = "FOUND: " .. foundCount
-	task.wait(2)
-	ScanButton.Text = "SCAN"
+    ScanButton.Text = "SCANNING..."
+    local foundCount = 0
+    for _, item in pairs(game:GetDescendants()) do
+        if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
+            foundCount = foundCount + 1
+            pcall(function() item:FireServer("print('Vulnerable')") end)
+        end
+        if foundCount % 100 == 0 then task.wait() end
+    end
+    ScanButton.Text = "FOUND: " .. foundCount
+    task.wait(2)
+    ScanButton.Text = "SCAN"
 end)
 
--- 6. PERFIL DE USUARIO (Scan Panel)
+-- 7. CARGAR INFO DE USUARIO
 local function LoadUser()
-	local id = LocalPlayer.UserId
-	UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..id.."&w=100&h=100"
-	WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
-	UserId.Text = "User ID: " .. id
+    local id = LocalPlayer.UserId
+    UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..id.."&w=100&h=100"
+    WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
+    UserId.Text = "User ID: " .. id
 end
 LoadUser()
 
--- 7. TOGGLE GLOBAL (Abrir/Cerrar con Logo)
+-- 8. BOTÓN DE ABRIR/CERRAR (Logo)
 ToggleButton.MouseButton1Click:Connect(function()
-	Background.Visible = not Background.Visible
+    Background.Visible = not Background.Visible
+    -- Si se cierra el fondo, también cerramos el panel de color por si estaba abierto
+    if not Background.Visible then
+        BackgroundColorGui.Enabled = false
+    end
 end)
 
--- 8. DRAG SYSTEM (Para que puedas mover el Background)
-local UIS = game:GetService("UserInputService")
-local dragObj = Background
-local dragToggle, dragInput, dragStart, startPos
-
-dragObj.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragToggle = true
-		dragStart = input.Position
-		startPos = dragObj.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then dragToggle = false end
-		end)
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement and dragToggle then
-		local delta = input.Position - dragStart
-		dragObj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
-
-print("Hyperion Engine Injected.")
+print("Hyperion Engine Loaded. No Drag. Scan Active.")
