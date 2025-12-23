@@ -544,101 +544,66 @@ UICorner_19.Parent = BackgroundColor
 
 
 -------------------------------------------------------------------------
--- [ HYPERION V1 - DIRECT BACKDOOR & NOTIFICATIONS ] --
+-- [ HYPERION V1 - FINAL FIX ] --
 -------------------------------------------------------------------------
 
-local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
-local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- 1. CONFIGURACIÓN DE INICIO
-Hyperion.Enabled = true
-ScanPanel.Enabled = true
-ExecutorPanel.Enabled = false
-SettingsPanel.Enabled = false
-
--- Función para enviar notificaciones estilo Roblox
-local function SendNotification(title, text)
+-- Función de Notificación
+local function Notify(txt)
     StarterGui:SetCore("SendNotification", {
-        Title = title,
-        Text = text,
-        Icon = "rbxassetid://95681654391325", -- Tu logo de Hyperion
-        Duration = 5
+        Title = "Hyperion",
+        Text = txt,
+        Icon = "rbxassetid://95681654391325",
+        Duration = 4
     })
 end
 
--- 2. TOGGLE TOTAL
-ToggleButton.MouseButton1Click:Connect(function()
-    Hyperion.Enabled = not Hyperion.Enabled
-end)
-
--- 3. DETECCIÓN DIRECTA DE BACKDOOR
-local BACKDOOR_NAME = "\201\134\201" -- Nombre del remoto de la backdoor
-
+-- LÓGICA DEL BOTÓN SCAN
 ScanButton.MouseButton1Click:Connect(function()
     ScanButton.Text = "Checking..."
-    task.wait(0.7)
+    task.wait(0.5)
     
-    -- Buscamos en los lugares clave
-    local backdoor = game:GetService("JointsService"):FindFirstChild(BACKDOOR_NAME) or 
-                     game:GetService("ReplicatedStorage"):FindFirstChild(BACKDOOR_NAME) or
-                     game:GetService("LogService"):FindFirstChild(BACKDOOR_NAME)
-
-    if backdoor then
-        -- SI HAY BACKDOOR
-        ScanButton.TextColor3 = Color3.fromRGB(0, 255, 127) -- Verde
+    -- Buscamos el puente en ReplicatedStorage
+    local bridge = ReplicatedStorage:FindFirstChild("Hyperion_Bridge")
+    
+    if bridge then
+        ScanButton.TextColor3 = Color3.fromRGB(0, 255, 127)
         ScanButton.Text = "Backdoor found!"
-        
-        -- Notificación a la derecha abajo
-        SendNotification("Hyperion", "Backdoor found!")
-        
-        -- Prueba de conexión
-        pcall(function()
-            backdoor:FireServer("print('Hyperion SS Connected')")
-        end)
+        Notify("Backdoor found!")
     else
-        -- NO HAY BACKDOOR
-        ScanButton.TextColor3 = Color3.fromRGB(255, 80, 80) -- Rojo
+        ScanButton.TextColor3 = Color3.fromRGB(255, 80, 80)
         ScanButton.Text = "No backdoor."
-        
+        Notify("No backdoor found in this server.")
         task.wait(2)
         ScanButton.TextColor3 = Color3.fromRGB(0, 0, 0)
         ScanButton.Text = "SCAN"
     end
 end)
 
--- 4. NAVEGACIÓN ENTRE PANELES
-local function switchPanel(toEnable)
-    ScanPanel.Enabled = false
-    ExecutorPanel.Enabled = false
-    SettingsPanel.Enabled = false
-    toEnable.Enabled = true
-end
-
-ScanPanelButton.MouseButton1Click:Connect(function() switchPanel(ScanPanel) end)
-ExecutorPanelButton.MouseButton1Click:Connect(function() switchPanel(ExecutorPanel) end)
-SettingsPanelButton.MouseButton1Click:Connect(function() switchPanel(SettingsPanel) end)
-
--- 5. LÓGICA EXECUTOR LOCAL
+-- LÓGICA DEL BOTÓN EXECUTE (Híbrido)
 ExecuteButton.MouseButton1Click:Connect(function()
-    local func, err = loadstring(Script.Text)
-    if func then 
-        pcall(func) 
-    else 
-        warn("Hyperion Error: "..err) 
+    local code = Script.Text
+    local bridge = ReplicatedStorage:FindFirstChild("Hyperion_Bridge")
+    
+    if bridge then
+        -- Si hay backdoor, lo manda al SERVIDOR
+        bridge:FireServer(code)
+        Notify("Executed on Server!")
+    else
+        -- Si no hay, lo intenta ejecutar LOCAL
+        local func, err = loadstring(code)
+        if func then 
+            pcall(func)
+            Notify("Executed Locally")
+        else 
+            warn("Hyperion Error: "..err) 
+        end
     end
 end)
 
-ClearButton.MouseButton1Click:Connect(function()
-    Script.Text = ""
+-- RESET DE PANELES (Para que se oculte todo bien)
+ToggleButton.MouseButton1Click:Connect(function()
+    Hyperion.Enabled = not Hyperion.Enabled
 end)
-
--- 6. CARGAR PERFIL
-local function LoadProfile()
-    UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..LocalPlayer.UserId.."&w=100&h=100"
-    WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
-    UserId.Text = "ID: " .. LocalPlayer.UserId
-end
-LoadProfile()
-
-print("Hyperion V1: Direct Backdoor & Notifications Active.")
