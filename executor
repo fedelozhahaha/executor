@@ -1,66 +1,693 @@
--- CÓDIGO DEL EXECUTOR (GUI + ENVÍO)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CoreGui = game:GetService("CoreGui")
+-- Gui to Lua
+-- Version: 3.2
 
--- 1. BUSCAR LA PUERTA (RemoteEvent)
--- Usamos un tiempo de espera de 5 segundos para que no se bloquee el script
-local remote = ReplicatedStorage:WaitForChild("CanalPrivado", 5)
+-- Instances:
 
-if not remote then
-    warn("❌ ERROR: No se encontró la backdoor 'CanalPrivado'.")
-    return
+local Hyperion = Instance.new("ScreenGui")
+local Toggle = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("ImageButton")
+local UICorner = Instance.new("UICorner")
+local Background = Instance.new("Frame")
+local UICorner_2 = Instance.new("UICorner")
+local ExecutorPanelButton = Instance.new("TextButton")
+local ScanPanelButton = Instance.new("TextButton")
+local SettingsPanelButton = Instance.new("TextButton")
+local Logo = Instance.new("ImageLabel")
+local UICorner_3 = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local UICorner_4 = Instance.new("UICorner")
+local Line = Instance.new("Frame")
+local Line2 = Instance.new("Frame")
+local ScanPanel = Instance.new("ScreenGui")
+local UserAvatar = Instance.new("ImageLabel")
+local UICorner1 = Instance.new("UICorner")
+local ScanButton = Instance.new("TextButton")
+local UICorner1_2 = Instance.new("UICorner")
+local UserId = Instance.new("TextLabel")
+local UICorner2 = Instance.new("UICorner")
+local WelcomeText = Instance.new("TextLabel")
+local UICorner2_2 = Instance.new("UICorner")
+local ExecutorPanel = Instance.new("ScreenGui")
+local ExecutorText = Instance.new("TextLabel")
+local UICorner_5 = Instance.new("UICorner")
+local Script = Instance.new("TextBox")
+local ExecuteButton = Instance.new("TextButton")
+local ClearButton = Instance.new("TextButton")
+local SettingsPanel = Instance.new("ScreenGui")
+local AntiAFKText = Instance.new("TextLabel")
+local AntiAFK = Instance.new("TextButton")
+local UICorner_6 = Instance.new("UICorner")
+local Frame = Instance.new("Frame")
+local UICorner_7 = Instance.new("UICorner")
+local UICorner_8 = Instance.new("UICorner")
+local R6Text = Instance.new("TextLabel")
+local R6Button = Instance.new("TextButton")
+local UICorner_9 = Instance.new("UICorner")
+local Frame_2 = Instance.new("Frame")
+local UICorner_10 = Instance.new("UICorner")
+local UICorner_11 = Instance.new("UICorner")
+local BackgroundColor = Instance.new("TextLabel")
+local BackgroundColorButton = Instance.new("TextButton")
+local UICorner_12 = Instance.new("UICorner")
+local Frame_3 = Instance.new("Frame")
+local UICorner_13 = Instance.new("UICorner")
+local BackgroundColorGui = Instance.new("ScreenGui")
+local Frame_4 = Instance.new("Frame")
+local UICorner_14 = Instance.new("UICorner")
+local Title_2 = Instance.new("TextLabel")
+local UICorner_15 = Instance.new("UICorner")
+local InsertHexadecimalText = Instance.new("TextLabel")
+local UICorner_16 = Instance.new("UICorner")
+local TextBox = Instance.new("TextBox")
+local UICorner_17 = Instance.new("UICorner")
+local TextButton = Instance.new("TextButton")
+local UICorner_18 = Instance.new("UICorner")
+local UICorner_19 = Instance.new("UICorner")
+
+--Properties:
+
+Hyperion.Name = "Hyperion"
+Hyperion.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Hyperion.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Toggle.Name = "Toggle"
+Toggle.Parent = Hyperion
+Toggle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = Toggle
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Position = UDim2.new(0.0256118383, 0, 0.775568187, 0)
+ToggleButton.Size = UDim2.new(0, 122, 0, 109)
+ToggleButton.Image = "rbxassetid://95681654391325"
+
+UICorner.Parent = ToggleButton
+
+Background.Name = "Background"
+Background.Parent = Hyperion
+Background.BackgroundColor3 = Color3.fromRGB(80, 61, 89)
+Background.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Background.BorderSizePixel = 0
+Background.Position = UDim2.new(0.294820726, 0, 0.267045468, 0)
+Background.Size = UDim2.new(0, 720, 0, 347)
+
+UICorner_2.Parent = Background
+
+ExecutorPanelButton.Name = "ExecutorPanelButton"
+ExecutorPanelButton.Parent = Background
+ExecutorPanelButton.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+ExecutorPanelButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ExecutorPanelButton.BorderSizePixel = 0
+ExecutorPanelButton.LayoutOrder = 1000
+ExecutorPanelButton.Position = UDim2.new(0.37184906, 0, 0.181859091, 0)
+ExecutorPanelButton.Size = UDim2.new(0, 184, 0, 39)
+ExecutorPanelButton.Font = Enum.Font.DenkOne
+ExecutorPanelButton.Text = "Executor"
+ExecutorPanelButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ExecutorPanelButton.TextScaled = true
+ExecutorPanelButton.TextSize = 14.000
+ExecutorPanelButton.TextWrapped = true
+
+ScanPanelButton.Name = "ScanPanelButton"
+ScanPanelButton.Parent = Background
+ScanPanelButton.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+ScanPanelButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ScanPanelButton.BorderSizePixel = 0
+ScanPanelButton.LayoutOrder = 1000
+ScanPanelButton.Position = UDim2.new(-0.000715382921, 0, 0.176095396, 0)
+ScanPanelButton.Size = UDim2.new(0, 184, 0, 40)
+ScanPanelButton.Font = Enum.Font.DenkOne
+ScanPanelButton.Text = "Scan"
+ScanPanelButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ScanPanelButton.TextScaled = true
+ScanPanelButton.TextSize = 14.000
+ScanPanelButton.TextWrapped = true
+
+SettingsPanelButton.Name = "SettingsPanelButton"
+SettingsPanelButton.Parent = Background
+SettingsPanelButton.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+SettingsPanelButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SettingsPanelButton.BorderSizePixel = 0
+SettingsPanelButton.LayoutOrder = 1000
+SettingsPanelButton.Position = UDim2.new(0.743024707, 0, 0.181859091, 0)
+SettingsPanelButton.Size = UDim2.new(0, 184, 0, 37)
+SettingsPanelButton.Font = Enum.Font.DenkOne
+SettingsPanelButton.Text = "Settings"
+SettingsPanelButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+SettingsPanelButton.TextScaled = true
+SettingsPanelButton.TextSize = 14.000
+SettingsPanelButton.TextWrapped = true
+
+Logo.Name = "Logo"
+Logo.Parent = Background
+Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Logo.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Logo.BorderSizePixel = 0
+Logo.LayoutOrder = 1000
+Logo.Position = UDim2.new(0.0413628481, 0, -0.00335922022, 0)
+Logo.Size = UDim2.new(0, 61, 0, 61)
+Logo.Image = "rbxassetid://95681654391325"
+
+UICorner_3.Parent = Logo
+
+Title.Name = "Title"
+Title.Parent = Background
+Title.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+Title.BackgroundTransparency = 0.300
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.LayoutOrder = 1000
+Title.Position = UDim2.new(0.410705894, 0, 0.028341068, 0)
+Title.Size = UDim2.new(0, 129, 0, 38)
+Title.Font = Enum.Font.DenkOne
+Title.Text = "Hyperion V1"
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
+Title.TextScaled = true
+Title.TextSize = 14.000
+Title.TextTransparency = 0.300
+Title.TextWrapped = true
+
+UICorner_4.Parent = Title
+
+Line.Name = "Line"
+Line.Parent = Background
+Line.BackgroundColor3 = Color3.fromRGB(134, 86, 138)
+Line.BackgroundTransparency = 0.300
+Line.BorderColor3 = Color3.fromRGB(103, 71, 104)
+Line.BorderSizePixel = 0
+Line.LayoutOrder = 1000
+Line.Position = UDim2.new(0.000376383454, 0, 0.173090771, 0)
+Line.Size = UDim2.new(0, 720, 0, 2)
+
+Line2.Name = "Line2"
+Line2.Parent = Background
+Line2.BackgroundColor3 = Color3.fromRGB(134, 86, 138)
+Line2.BackgroundTransparency = 0.300
+Line2.BorderColor3 = Color3.fromRGB(103, 71, 104)
+Line2.BorderSizePixel = 0
+Line2.LayoutOrder = 1000
+Line2.Position = UDim2.new(-0.00101250538, 0, 0.292310745, 0)
+Line2.Size = UDim2.new(0, 720, 0, 2)
+
+ScanPanel.Name = "ScanPanel"
+ScanPanel.Parent = Background
+ScanPanel.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+UserAvatar.Name = "UserAvatar"
+UserAvatar.Parent = ScanPanel
+UserAvatar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+UserAvatar.BorderColor3 = Color3.fromRGB(0, 0, 0)
+UserAvatar.BorderSizePixel = 0
+UserAvatar.Position = UDim2.new(0.299979478, 0, 0.46330148, 0)
+UserAvatar.Size = UDim2.new(0, 100, 0, 100)
+UserAvatar.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+
+UICorner1.Name = "UICorner1"
+UICorner1.Parent = UserAvatar
+
+ScanButton.Name = "ScanButton"
+ScanButton.Parent = ScanPanel
+ScanButton.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+ScanButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ScanButton.BorderSizePixel = 0
+ScanButton.Position = UDim2.new(0.546202481, 0, 0.471844673, 0)
+ScanButton.Size = UDim2.new(0, 200, 0, 156)
+ScanButton.Font = Enum.Font.DenkOne
+ScanButton.Text = "Scan"
+ScanButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ScanButton.TextScaled = true
+ScanButton.TextSize = 14.000
+ScanButton.TextWrapped = true
+
+UICorner1_2.Name = "UICorner1"
+UICorner1_2.Parent = ScanButton
+
+UserId.Name = "UserId"
+UserId.Parent = ScanPanel
+UserId.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+UserId.BackgroundTransparency = 0.300
+UserId.BorderColor3 = Color3.fromRGB(0, 0, 0)
+UserId.BorderSizePixel = 0
+UserId.Position = UDim2.new(0.370720327, 0, 0.577238321, 0)
+UserId.Size = UDim2.new(0, 183, 0, 19)
+UserId.Font = Enum.Font.DenkOne
+UserId.Text = "User ID: {UserID}"
+UserId.TextColor3 = Color3.fromRGB(0, 0, 0)
+UserId.TextScaled = true
+UserId.TextSize = 14.000
+UserId.TextTransparency = 0.300
+UserId.TextWrapped = true
+
+UICorner2.Name = "UICorner2"
+UICorner2.Parent = UserId
+
+WelcomeText.Name = "WelcomeText"
+WelcomeText.Parent = ScanPanel
+WelcomeText.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+WelcomeText.BackgroundTransparency = 0.300
+WelcomeText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WelcomeText.BorderSizePixel = 0
+WelcomeText.Position = UDim2.new(0.376902133, 0, 0.480897129, 0)
+WelcomeText.Size = UDim2.new(0, 163, 0, 56)
+WelcomeText.Font = Enum.Font.DenkOne
+WelcomeText.Text = "Welcome back, {user}."
+WelcomeText.TextColor3 = Color3.fromRGB(0, 0, 0)
+WelcomeText.TextScaled = true
+WelcomeText.TextSize = 14.000
+WelcomeText.TextTransparency = 0.300
+WelcomeText.TextWrapped = true
+
+UICorner2_2.Name = "UICorner2"
+UICorner2_2.Parent = WelcomeText
+
+ExecutorPanel.Name = "ExecutorPanel"
+ExecutorPanel.Parent = Background
+ExecutorPanel.Enabled = false
+ExecutorPanel.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+ExecutorText.Name = "ExecutorText"
+ExecutorText.Parent = ExecutorPanel
+ExecutorText.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+ExecutorText.BackgroundTransparency = 0.300
+ExecutorText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ExecutorText.BorderSizePixel = 0
+ExecutorText.LayoutOrder = 1000
+ExecutorText.Position = UDim2.new(0.304843605, 0, 0.424848467, 0)
+ExecutorText.Size = UDim2.new(0, 129, 0, 38)
+ExecutorText.Font = Enum.Font.DenkOne
+ExecutorText.Text = "Executor"
+ExecutorText.TextColor3 = Color3.fromRGB(0, 0, 0)
+ExecutorText.TextScaled = true
+ExecutorText.TextSize = 14.000
+ExecutorText.TextTransparency = 0.300
+ExecutorText.TextWrapped = true
+
+UICorner_5.Parent = ExecutorText
+
+Script.Name = "Script"
+Script.Parent = ExecutorPanel
+Script.BackgroundColor3 = Color3.fromRGB(85, 42, 103)
+Script.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Script.BorderSizePixel = 3
+Script.Position = UDim2.new(0.38474673, 0, 0.436079532, 0)
+Script.Size = UDim2.new(0, 402, 0, 198)
+Script.Font = Enum.Font.SourceSans
+Script.MultiLine = true
+Script.Text = "\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n"
+Script.TextColor3 = Color3.fromRGB(255, 255, 255)
+Script.TextSize = 14.000
+Script.TextXAlignment = Enum.TextXAlignment.Left
+Script.TextYAlignment = Enum.TextYAlignment.Top
+
+ExecuteButton.Name = "ExecuteButton"
+ExecuteButton.Parent = ExecutorPanel
+ExecuteButton.BackgroundColor3 = Color3.fromRGB(113, 58, 145)
+ExecuteButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ExecuteButton.BorderSizePixel = 0
+ExecuteButton.Position = UDim2.new(0.626636326, 0, 0.495738626, 0)
+ExecuteButton.Size = UDim2.new(0, 122, 0, 50)
+ExecuteButton.Font = Enum.Font.DenkOne
+ExecuteButton.Text = "Execute"
+ExecuteButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ExecuteButton.TextScaled = true
+ExecuteButton.TextSize = 14.000
+ExecuteButton.TextWrapped = true
+
+ClearButton.Name = "ClearButton"
+ClearButton.Parent = ExecutorPanel
+ClearButton.BackgroundColor3 = Color3.fromRGB(113, 58, 145)
+ClearButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ClearButton.BorderSizePixel = 0
+ClearButton.Position = UDim2.new(0.626636326, 0, 0.583806813, 0)
+ClearButton.Size = UDim2.new(0, 122, 0, 50)
+ClearButton.Font = Enum.Font.DenkOne
+ClearButton.Text = "Clear"
+ClearButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ClearButton.TextScaled = true
+ClearButton.TextSize = 14.000
+ClearButton.TextWrapped = true
+
+SettingsPanel.Name = "SettingsPanel"
+SettingsPanel.Parent = Background
+SettingsPanel.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+AntiAFKText.Name = "AntiAFKText"
+AntiAFKText.Parent = SettingsPanel
+AntiAFKText.BackgroundColor3 = Color3.fromRGB(112, 36, 111)
+AntiAFKText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AntiAFKText.BorderSizePixel = 0
+AntiAFKText.Position = UDim2.new(0.294820726, 0, 0.454545468, 0)
+AntiAFKText.Size = UDim2.new(0, 200, 0, 50)
+AntiAFKText.Font = Enum.Font.DenkOne
+AntiAFKText.Text = "Anti - AFK"
+AntiAFKText.TextColor3 = Color3.fromRGB(0, 0, 0)
+AntiAFKText.TextScaled = true
+AntiAFKText.TextSize = 14.000
+AntiAFKText.TextWrapped = true
+
+AntiAFK.Name = "AntiAFK"
+AntiAFK.Parent = AntiAFKText
+AntiAFK.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+AntiAFK.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AntiAFK.BorderSizePixel = 0
+AntiAFK.LayoutOrder = 1000
+AntiAFK.Position = UDim2.new(0.259428412, 0, 1.64040649, 0)
+AntiAFK.Size = UDim2.new(0, 96, 0, 60)
+AntiAFK.Font = Enum.Font.DenkOne
+AntiAFK.Text = ""
+AntiAFK.TextColor3 = Color3.fromRGB(0, 0, 0)
+AntiAFK.TextScaled = true
+AntiAFK.TextSize = 14.000
+AntiAFK.TextWrapped = true
+
+UICorner_6.CornerRadius = UDim.new(1, 0)
+UICorner_6.Parent = AntiAFK
+
+Frame.Parent = AntiAFK
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0, 0, 0.100000001, 0)
+Frame.Size = UDim2.new(0, 47, 0, 47)
+
+UICorner_7.CornerRadius = UDim.new(1, 0)
+UICorner_7.Parent = Frame
+
+UICorner_8.Parent = AntiAFKText
+
+R6Text.Name = "R6Text"
+R6Text.Parent = SettingsPanel
+R6Text.BackgroundColor3 = Color3.fromRGB(112, 36, 111)
+R6Text.BorderColor3 = Color3.fromRGB(0, 0, 0)
+R6Text.BorderSizePixel = 0
+R6Text.Position = UDim2.new(0.442800224, 0, 0.454545468, 0)
+R6Text.Size = UDim2.new(0, 200, 0, 50)
+R6Text.Font = Enum.Font.DenkOne
+R6Text.Text = "R6 Body"
+R6Text.TextColor3 = Color3.fromRGB(0, 0, 0)
+R6Text.TextScaled = true
+R6Text.TextSize = 14.000
+R6Text.TextWrapped = true
+
+R6Button.Name = "R6Button"
+R6Button.Parent = R6Text
+R6Button.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+R6Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+R6Button.BorderSizePixel = 0
+R6Button.LayoutOrder = 1000
+R6Button.Position = UDim2.new(0.259428412, 0, 1.64040649, 0)
+R6Button.Size = UDim2.new(0, 96, 0, 60)
+R6Button.Font = Enum.Font.DenkOne
+R6Button.Text = ""
+R6Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+R6Button.TextScaled = true
+R6Button.TextSize = 14.000
+R6Button.TextWrapped = true
+
+UICorner_9.CornerRadius = UDim.new(1, 0)
+UICorner_9.Parent = R6Button
+
+Frame_2.Parent = R6Button
+Frame_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame_2.BorderSizePixel = 0
+Frame_2.Position = UDim2.new(0, 0, 0.100000001, 0)
+Frame_2.Size = UDim2.new(0, 47, 0, 47)
+
+UICorner_10.CornerRadius = UDim.new(1, 0)
+UICorner_10.Parent = Frame_2
+
+UICorner_11.Parent = R6Text
+
+BackgroundColor.Name = "BackgroundColor"
+BackgroundColor.Parent = SettingsPanel
+BackgroundColor.BackgroundColor3 = Color3.fromRGB(112, 36, 111)
+BackgroundColor.BorderColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundColor.BorderSizePixel = 0
+BackgroundColor.Position = UDim2.new(0.589641452, 0, 0.454545468, 0)
+BackgroundColor.Size = UDim2.new(0, 200, 0, 50)
+BackgroundColor.Font = Enum.Font.DenkOne
+BackgroundColor.Text = "Background Color"
+BackgroundColor.TextColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundColor.TextScaled = true
+BackgroundColor.TextSize = 14.000
+BackgroundColor.TextWrapped = true
+
+BackgroundColorButton.Name = "BackgroundColorButton"
+BackgroundColorButton.Parent = BackgroundColor
+BackgroundColorButton.BackgroundColor3 = Color3.fromRGB(182, 137, 182)
+BackgroundColorButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundColorButton.BorderSizePixel = 0
+BackgroundColorButton.LayoutOrder = 1000
+BackgroundColorButton.Position = UDim2.new(0.25942871, 0, 1.64040649, 0)
+BackgroundColorButton.Size = UDim2.new(0, 96, 0, 60)
+BackgroundColorButton.Font = Enum.Font.DenkOne
+BackgroundColorButton.Text = ""
+BackgroundColorButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundColorButton.TextScaled = true
+BackgroundColorButton.TextSize = 14.000
+BackgroundColorButton.TextWrapped = true
+
+UICorner_12.CornerRadius = UDim.new(1, 0)
+UICorner_12.Parent = BackgroundColorButton
+
+Frame_3.Parent = BackgroundColorButton
+Frame_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame_3.BorderSizePixel = 0
+Frame_3.Position = UDim2.new(0, 0, 0.100000001, 0)
+Frame_3.Size = UDim2.new(0, 47, 0, 47)
+
+UICorner_13.CornerRadius = UDim.new(1, 0)
+UICorner_13.Parent = Frame_3
+
+BackgroundColorGui.Name = "BackgroundColorGui"
+BackgroundColorGui.Parent = BackgroundColorButton
+BackgroundColorGui.Enabled = false
+BackgroundColorGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame_4.Parent = BackgroundColorGui
+Frame_4.BackgroundColor3 = Color3.fromRGB(80, 61, 89)
+Frame_4.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame_4.BorderSizePixel = 0
+Frame_4.Position = UDim2.new(0.717700601, 0, 0.281014711, 0)
+Frame_4.Size = UDim2.new(0, 431, 0, 234)
+
+UICorner_14.Parent = Frame_4
+
+Title_2.Name = "Title"
+Title_2.Parent = Frame_4
+Title_2.BackgroundColor3 = Color3.fromRGB(121, 42, 121)
+Title_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title_2.BorderSizePixel = 0
+Title_2.Position = UDim2.new(0.267103732, 0, 0.0600831769, 0)
+Title_2.Size = UDim2.new(0, 200, 0, 50)
+Title_2.Font = Enum.Font.DenkOne
+Title_2.Text = "Background Color"
+Title_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title_2.TextScaled = true
+Title_2.TextSize = 14.000
+Title_2.TextWrapped = true
+
+UICorner_15.Parent = Title_2
+
+InsertHexadecimalText.Name = "InsertHexadecimalText"
+InsertHexadecimalText.Parent = Frame_4
+InsertHexadecimalText.BackgroundColor3 = Color3.fromRGB(121, 42, 121)
+InsertHexadecimalText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+InsertHexadecimalText.BorderSizePixel = 0
+InsertHexadecimalText.Position = UDim2.new(0, 0, 0.432432503, 0)
+InsertHexadecimalText.Size = UDim2.new(0, 200, 0, 50)
+InsertHexadecimalText.Font = Enum.Font.DenkOne
+InsertHexadecimalText.Text = "Insert Hexadecimal Number:"
+InsertHexadecimalText.TextColor3 = Color3.fromRGB(255, 255, 255)
+InsertHexadecimalText.TextScaled = true
+InsertHexadecimalText.TextSize = 14.000
+InsertHexadecimalText.TextWrapped = true
+
+UICorner_16.Parent = InsertHexadecimalText
+
+TextBox.Parent = Frame_4
+TextBox.BackgroundColor3 = Color3.fromRGB(121, 42, 121)
+TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextBox.BorderSizePixel = 0
+TextBox.Position = UDim2.new(0.494830847, 0, 0.432432503, 0)
+TextBox.Size = UDim2.new(0, 189, 0, 50)
+TextBox.Font = Enum.Font.SourceSans
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextScaled = true
+TextBox.TextSize = 14.000
+TextBox.TextWrapped = true
+
+UICorner_17.Parent = TextBox
+
+TextButton.Parent = Frame_4
+TextButton.BackgroundColor3 = Color3.fromRGB(74, 35, 74)
+TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.BorderSizePixel = 0
+TextButton.Position = UDim2.new(0.298196524, 0, 0.735135138, 0)
+TextButton.Size = UDim2.new(0, 172, 0, 43)
+TextButton.Font = Enum.Font.DenkOne
+TextButton.Text = "Apply"
+TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.TextScaled = true
+TextButton.TextSize = 14.000
+TextButton.TextWrapped = true
+
+UICorner_18.Parent = TextButton
+
+UICorner_19.Parent = BackgroundColor
+
+-------------------------------------------------------------------------
+-- [ HYPERION V1 - LOGIC INJECTION ] --
+-------------------------------------------------------------------------
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- 1. CONFIGURACIÓN INICIAL DE PANELES
+-- Aseguramos que solo el panel de Scan se vea al inicio
+ScanPanel.Enabled = true
+ExecutorPanel.Enabled = false
+SettingsPanel.Enabled = false
+
+local function switchPanel(toEnable)
+	ScanPanel.Enabled = false
+	ExecutorPanel.Enabled = false
+	SettingsPanel.Enabled = false
+	toEnable.Enabled = true
 end
 
--- 2. CREAR LA INTERFAZ VISUAL
--- Usamos CoreGui para que la ventana sea independiente de tu juego
-local screenGui = Instance.new("ScreenGui", CoreGui)
-screenGui.Name = "ServerSideExecutor"
+ScanPanelButton.MouseButton1Click:Connect(function() switchPanel(ScanPanel) end)
+ExecutorPanelButton.MouseButton1Click:Connect(function() switchPanel(ExecutorPanel) end)
+SettingsPanelButton.MouseButton1Click:Connect(function() switchPanel(SettingsPanel) end)
 
-local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 350, 0, 220)
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -110)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.Active = true
-mainFrame.Draggable = true -- Permite mover la ventana con el ratón
+-- 2. SISTEMA DE TOGGLES ANIMADOS (Settings)
+local function MakeToggle(button, circle, callback)
+	local enabled = false
+	button.MouseButton1Click:Connect(function()
+		enabled = not enabled
 
-local corner = Instance.new("UICorner", mainFrame)
+		-- Colores: Verde si ON, Morado original si OFF
+		local targetColor = enabled and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(182, 137, 182)
+		-- Posición: Derecha si ON, Izquierda si OFF (Basado en el ancho del botón)
+		local targetPos = enabled and UDim2.new(0.5, 0, 0.1, 0) or UDim2.new(0, 0, 0.1, 0)
 
-local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "SERVER EXECUTOR"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
+		TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = targetColor}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = targetPos}):Play()
 
--- 3. CAJA DE TEXTO (Donde escribes el código)
-local textBox = Instance.new("TextBox", mainFrame)
-textBox.Size = UDim2.new(0.9, 0, 0, 120)
-textBox.Position = UDim2.new(0.05, 0, 0.2, 0)
-textBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-textBox.TextColor3 = Color3.new(1, 1, 1)
-textBox.Text = "print('Hola desde el Servidor')"
-textBox.ClearTextOnFocus = false
-textBox.MultiLine = true
-textBox.TextXAlignment = Enum.TextXAlignment.Left
-textBox.TextYAlignment = Enum.TextYAlignment.Top
+		callback(enabled)
+	end)
+end
 
--- 4. BOTÓN DE EJECUCIÓN
-local executeBtn = Instance.new("TextButton", mainFrame)
-executeBtn.Size = UDim2.new(0.9, 0, 0, 40)
-executeBtn.Position = UDim2.new(0.05, 0, 0.78, 0)
-executeBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 0)
-executeBtn.Text = "EXECUTE SERVER-SIDE"
-executeBtn.TextColor3 = Color3.new(1, 1, 1)
-executeBtn.Font = Enum.Font.GothamBold
-
-local btnCorner = Instance.new("UICorner", executeBtn)
-
--- 5. LÓGICA DE ENVÍO
-executeBtn.MouseButton1Click:Connect(function()
-    local codeToSend = textBox.Text
-    -- Enviamos el texto directamente al servidor a través del RemoteEvent
-    remote:FireServer(codeToSend)
-    print("🚀 Código enviado al servidor: " .. codeToSend)
+-- Toggle: Anti-AFK
+MakeToggle(AntiAFK, Frame, function(state)
+	if state then
+		_G.AntiAFK = LocalPlayer.Idled:Connect(function()
+			game:GetService("VirtualUser"):CaptureController()
+			game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+		end)
+	else
+		if _G.AntiAFK then _G.AntiAFK:Disconnect() end
+	end
 end)
 
-print("✅ GUI del Executor cargada con éxito.")
+-- Toggle: R6 Body
+MakeToggle(R6Button, Frame_2, function(state)
+	if state then print("R6 Mode: Activated (Local)") end
+end)
+
+-- 3. BACKGROUND COLOR (Hex Logic)
+BackgroundColorButton.MouseButton1Click:Connect(function()
+	BackgroundColorGui.Enabled = not BackgroundColorGui.Enabled
+end)
+
+TextButton.MouseButton1Click:Connect(function() -- Botón "Apply"
+	local hexInput = TextBox.Text:gsub("#", "")
+	local success, color = pcall(function() return Color3.fromHex(hexInput) end)
+
+	if success then
+		Background.BackgroundColor3 = color
+		Frame_4.BackgroundColor3 = color
+		BackgroundColorGui.Enabled = false
+	else
+		TextBox.Text = "ERR: HEX"
+		task.wait(1)
+		TextBox.Text = ""
+	end
+end)
+
+-- 4. EXECUTOR (Execute & Clear)
+ExecuteButton.MouseButton1Click:Connect(function()
+	local code = Script.Text
+	local func, err = loadstring(code)
+	if func then
+		pcall(func)
+	else
+		warn("Hyperion Error: " .. err)
+	end
+end)
+
+ClearButton.MouseButton1Click:Connect(function()
+	Script.Text = ""
+end)
+
+-- 5. SCANNER (Backdoor Search)
+ScanButton.MouseButton1Click:Connect(function()
+	ScanButton.Text = "SCANNING..."
+	local foundCount = 0
+	for _, item in pairs(game:GetDescendants()) do
+		if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
+			foundCount = foundCount + 1
+			-- Test payload silencioso
+			pcall(function() item:FireServer("print('Vulnerable')") end)
+		end
+		if foundCount % 150 == 0 then task.wait() end
+	end
+	ScanButton.Text = "FOUND: " .. foundCount
+	task.wait(2)
+	ScanButton.Text = "SCAN"
+end)
+
+-- 6. PERFIL DE USUARIO (Scan Panel)
+local function LoadUser()
+	local id = LocalPlayer.UserId
+	UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..id.."&w=100&h=100"
+	WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
+	UserId.Text = "User ID: " .. id
+end
+LoadUser()
+
+-- 7. TOGGLE GLOBAL (Abrir/Cerrar con Logo)
+ToggleButton.MouseButton1Click:Connect(function()
+	Background.Visible = not Background.Visible
+end)
+
+-- 8. DRAG SYSTEM (Para que puedas mover el Background)
+local UIS = game:GetService("UserInputService")
+local dragObj = Background
+local dragToggle, dragInput, dragStart, startPos
+
+dragObj.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragToggle = true
+		dragStart = input.Position
+		startPos = dragObj.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragToggle = false end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement and dragToggle then
+		local delta = input.Position - dragStart
+		dragObj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+print("Hyperion Engine Injected.")
