@@ -548,6 +548,11 @@ local player = game.Players.LocalPlayer
 local REMOTE_NAME = "Lighting"
 local remote = game:GetService("ReplicatedStorage"):WaitForChild(REMOTE_NAME)
 
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = game.Players.LocalPlayer
+local REMOTE_NAME = "Lighting" -- Nombre del RemoteEvent de tu backdoor
+
 -- // VARIABLES DE ESTADO //
 local uiVisible = true
 local toggles = {
@@ -555,6 +560,23 @@ local toggles = {
 	R6 = false,
 	BGColor = false
 }
+
+-- // FUNCIÓN PARA CARGAR INFO DE USUARIO AUTOMÁTICAMENTE //
+local function loadUserData()
+	WelcomeText.Text = "Welcome back, " .. player.Name .. "."
+	UserId.Text = "User ID: " .. player.UserId
+	
+	-- Carga la foto de perfil automáticamente
+	local thumb, ready = game.Players:GetUserThumbnailAsync(
+		player.UserId, 
+		Enum.ThumbnailType.HeadShot, 
+		Enum.ThumbnailSize.Size100x100
+	)
+	UserAvatar.Image = thumb
+end
+
+-- Llamamos a la función al iniciar el script
+loadUserData()
 
 -- // FUNCIÓN DE TWEEN PARA INTERRUPTORES //
 local function animateToggle(button, state)
@@ -564,38 +586,73 @@ local function animateToggle(button, state)
 	local targetPos = state and UDim2.new(0.5, 0, 0.1, 0) or UDim2.new(0, 0, 0.1, 0)
 	local targetColor = state and Color3.fromRGB(0, 215, 100) or Color3.fromRGB(255, 255, 255)
 
-	TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = targetPos, BackgroundColor3 = targetColor}):Play()
+	TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+		Position = targetPos, 
+		BackgroundColor3 = targetColor
+	}):Play()
 end
 
--- // FUNCIÓN DE NAVEGACIÓN //
-local function showPanel(panelName)
-	ScanPanel.Enabled = (panelName == "Scan")
-	ExecutorPanel.Enabled = (panelName == "Executor")
-	SettingsPanel.Enabled = (panelName == "Settings")
-end
-
-showPanel("Scan") -- Panel por defecto
+-- // BOTÓN SCAN (VERIFICADOR DE BACKDOOR) //
+ScanButton.MouseButton1Click:Connect(function()
+	ScanButton.Text = "Scanning..."
+	task.wait(1.5) -- Simulación de escaneo
+	
+	local backdoor = ReplicatedStorage:FindFirstChild(REMOTE_NAME)
+	
+	if backdoor and backdoor:IsA("RemoteEvent") then
+		ScanButton.Text = "Backdoor found."
+		ScanButton.TextColor3 = Color3.fromRGB(0, 255, 0) -- Verde si la encuentra
+	else
+		ScanButton.Text = "No backdoor :c"
+		ScanButton.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo si no
+	end
+	
+	task.wait(2)
+	ScanButton.Text = "Scan"
+	ScanButton.TextColor3 = Color3.fromRGB(0, 0, 0) -- Reset color
+end)
 
 -- // BOTÓN TOGGLE (OCULTAR TODO) //
 ToggleButton.MouseButton1Click:Connect(function()
 	uiVisible = not uiVisible
 	Background.Visible = uiVisible
-	-- Ocultamos los CanvasGroups o Enabled según la visibilidad general
-	ScanPanel.Enabled = uiVisible and (not ExecutorPanel.Enabled and not SettingsPanel.Enabled)
-	if not uiVisible then
-		ScanPanel.Enabled = false
-		ExecutorPanel.Enabled = false
-		SettingsPanel.Enabled = false
-		BackgroundColorGui.Enabled = false
-	else
-		showPanel("Scan") -- Al volver a mostrar, reseteamos a Scan por seguridad
+	
+	-- Forzamos que los paneles se oculten totalmente
+	ScanPanel.Enabled = uiVisible
+	ExecutorPanel.Enabled = false
+	SettingsPanel.Enabled = false
+	BackgroundColorGui.Enabled = false
+	
+	-- Si volvemos a mostrar la UI, nos aseguramos de que Scan sea el visible
+	if uiVisible then
+		ScanPanel.Enabled = true
 	end
 end)
 
--- // NAVEGACIÓN DE BOTONES //
-ScanPanelButton.MouseButton1Click:Connect(function() if uiVisible then showPanel("Scan") end end)
-ExecutorPanelButton.MouseButton1Click:Connect(function() if uiVisible then showPanel("Executor") end end)
-SettingsPanelButton.MouseButton1Click:Connect(function() if uiVisible then showPanel("Settings") end end)
+-- // NAVEGACIÓN DE PANELES //
+ScanPanelButton.MouseButton1Click:Connect(function() 
+	if uiVisible then 
+		ScanPanel.Enabled = true
+		ExecutorPanel.Enabled = false
+		SettingsPanel.Enabled = false
+	end 
+end)
+
+ExecutorPanelButton.MouseButton1Click:Connect(function() 
+	if uiVisible then 
+		ScanPanel.Enabled = false
+		ExecutorPanel.Enabled = true
+		SettingsPanel.Enabled = false
+	end 
+end)
+
+SettingsPanelButton.MouseButton1Click:Connect(function() 
+	if uiVisible then 
+		ScanPanel.Enabled = false
+		ExecutorPanel.Enabled = false
+		SettingsPanel.Enabled = true
+	end 
+end)
 
 -- // LÓGICA DE SETTINGS CON TWEEN //
 
@@ -603,20 +660,10 @@ SettingsPanelButton.MouseButton1Click:Connect(function() if uiVisible then showP
 AntiAFK.MouseButton1Click:Connect(function()
 	toggles.AntiAFK = not toggles.AntiAFK
 	animateToggle(AntiAFK, toggles.AntiAFK)
-	
-	if toggles.AntiAFK then
-		local vu = game:GetService("VirtualUser")
-		player.Idled:Connect(function()
-			if toggles.AntiAFK then
-				vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-				task.wait(1)
-				vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-			end
-		end)
-	end
+	-- El código de Anti-AFK ya está integrado en el sistema de eventos de IDLE
 end)
 
--- R6 Body (Simulación visual)
+-- R6 Body
 R6Button.MouseButton1Click:Connect(function()
 	toggles.R6 = not toggles.R6
 	animateToggle(R6Button, toggles.R6)
@@ -631,9 +678,14 @@ end)
 
 -- // EXECUTOR //
 ExecuteButton.MouseButton1Click:Connect(function()
-	if Script.Text ~= "" then
-		remote:FireServer(Script.Text)
-		ExecuteButton.Text = "¡Enviado!"
+	local backdoor = ReplicatedStorage:FindFirstChild(REMOTE_NAME)
+	if Script.Text ~= "" and backdoor then
+		backdoor:FireServer(Script.Text)
+		ExecuteButton.Text = "Executed!"
+		task.wait(0.7)
+		ExecuteButton.Text = "Execute"
+	else
+		ExecuteButton.Text = "No Backdoor"
 		task.wait(0.7)
 		ExecuteButton.Text = "Execute"
 	end
@@ -641,14 +693,6 @@ end)
 
 ClearButton.MouseButton1Click:Connect(function()
 	Script.Text = ""
-end)
-
--- // SCAN PANEL //
-ScanButton.MouseButton1Click:Connect(function()
-	WelcomeText.Text = "Bienvenido, " .. player.Name
-	UserId.Text = "ID: " .. player.UserId
-	local thumb, ready = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-	UserAvatar.Image = thumb
 end)
 
 -- // CAMBIAR COLOR HEX //
@@ -660,7 +704,7 @@ TextButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- // ARRASTRE MANUAL (SIN UIDRAGDETECTOR) //
+-- // SISTEMA DE ARRASTRE MANUAL //
 local dragging, dragInput, dragStart, startPos
 Background.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
